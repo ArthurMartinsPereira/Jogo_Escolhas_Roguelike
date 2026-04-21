@@ -1,6 +1,7 @@
 class Player:
-    def __init__(self):
+    def __init__(self, name, passives=None):
         # Stats
+        self.name = name
         self.level = 1
         self.xp = 0
         self.xp_cap = 10
@@ -14,11 +15,16 @@ class Player:
         }
 
         # Hp, Stamina e Pontos de Vida
-        self.max_hp = 80
-        self.hp = 80
+        self.max_hp = self.calculate_hp()
+        self.hp = self.max_hp
         self.life = 4
         self.stamina = 4
-        self.health = self.calculate_hp()
+
+        self.passives = passives if passives else []
+
+        self.effects = []
+
+        self.attack_timer = 0
 
         # Equipamentos
         self.equipament = {
@@ -32,7 +38,10 @@ class Player:
         self.gold = 10
 
     def calculate_hp(self):
-        return (self.stats["con"] // 3) * 10
+        return self.stats.get("con", 10) * 10
+
+    def calculate_life_stamina(self):
+        return 4 + (self.stats["con"] // 3)
 
     def update_hp(self):
         self.max_hp = self.calculate_hp()
@@ -60,17 +69,31 @@ class Player:
 
             if stat == "con":
                 self.update_hp()
+                new_max = self.calculate_life_stamina()
+                self.life = min(self.life, new_max)
+                self.stamina = min(self.stamina, new_max)
+
+    def get_attack_speed(self):
+        speed = self.stats.get("agi", 10)
+        context = {"speed": speed}
+        return context["speed"]
 
     def take_damage(self, dmg):
         self.hp -= dmg
         if self.hp < 0:
             self.hp = 0
+            self.perder_batalha()
 
     def perder_batalha(self):
-        self.life -= 1
-        self.stamina -= 1
+        self.life = max(0, self.life - 1)
+        self.stamina = max(0, self.stamina - 1)
         print("Você perdeu a batalha!")
         print(f"Vida: {self.life} | Stamina {self.stamina}")
 
     def is_alive(self):
-        return self.hp > 0
+        return self.life > 0
+
+    def reset_combat(self):
+        self.hp = self.max_hp
+        self.attack_timer = 0
+        self.effects.clear()
