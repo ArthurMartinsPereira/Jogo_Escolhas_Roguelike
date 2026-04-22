@@ -10,6 +10,8 @@ class Entity:
         self.effects = []
 
         self.attack_timer = 0
+        self.cancel_attack = False
+        self.stun = False
 
     def calculate_hp(self):
         return self.stats.get["con", 10] * 10

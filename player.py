@@ -1,3 +1,9 @@
+from Combat.passives import Context, Events, process_passives, DamageType
+
+
+# =========================
+# Stats:
+# =========================
 class Player:
     def __init__(self, name, passives=None):
         # Stats
@@ -14,15 +20,14 @@ class Player:
             "pre": 6
         }
 
-        # Hp, Stamina e Pontos de Vida
+        # Hp, Stamina and Life Points
         self.max_hp = self.calculate_hp()
         self.hp = self.max_hp
         self.life = 4
         self.stamina = 4
 
         self.passives = passives if passives else []
-
-        self.effects = []
+        self.status = {}
 
         self.attack_timer = 0
 
@@ -34,9 +39,13 @@ class Player:
             "artifact1": None,
             "artifact2": None
         }
+
         self.inventory = []
         self.gold = 10
 
+    # =========================
+    # Calculations
+    # =========================
     def calculate_hp(self):
         return self.stats.get("con", 10) * 10
 
@@ -47,6 +56,9 @@ class Player:
         self.max_hp = self.calculate_hp()
         self.hp = self.max_hp
 
+    # =========================
+    # Leveling
+    # =========================
     def gain_xp(self, amount):
         self.xp += amount
 
@@ -73,20 +85,94 @@ class Player:
                 self.life = min(self.life, new_max)
                 self.stamina = min(self.stamina, new_max)
 
+    # =========================
+    # Combat
+    # =========================
     def get_attack_speed(self):
-        speed = self.stats.get("agi", 10)
-        context = {"speed": speed}
-        return context["speed"]
+        ctx = Context(source=self, speed=self.stats.get("agi", 10))
+        process_passives(self, Events.GET_ATTACK_SPEED, ctx)
+        return getattr(ctx, "speed", self.stats.get("agi", 10))
 
-    def take_damage(self, dmg):
-        self.hp -= dmg
-        if self.hp < 0:
+    def process_status_effects(self):
+        if "bleed" in self.status:
+            bleed = self.status["bleed"]
+
+            self.take_damage(bleed["damage"], DamageType.BLEED)
+
+            bleed["duration"] -= 1
+            if bleed["duration"] <= 0:
+                del self.status["bleed"]
+
+    def tick(self):
+        ctx = Context(source=self, target=self, is_tick=True)
+        process_passives(self, Events.ON_TICK, ctx)
+        self.process_status_effects()
+
+    def attack(self, target):
+        damage_instances = []
+
+        # Basic Attack
+        if not self.equipament["handR"] and not self.equipament["handL"]:
+            damage_instances.append({
+                "damage": self.stats.get("str", 5),
+                "type": DamageType.PHYSICAL
+            })
+
+        ctx = Context(
+            source=self,
+            target=target,
+            damage_instances=damage_instances
+        )
+
+        process_passives(self, Events.ON_ATTACK, ctx)
+
+        # Protections
+        damage_instances = getattr(ctx, "damage_instances", [])
+        total_hits = max(1, 1 + getattr(ctx, "extra_hits", 0))
+
+        for _ in range(total_hits):
+            for dmg in damage_instances:
+                final_damage = target.take_damage(
+                    dmg["damage"],
+                    dmg["type"],
+                    source=self
+                )
+
+                hit_ctx = Context(
+                    damage=final_damage,
+                    type=dmg["type"],
+                    source=self,
+                    target=target
+                )
+
+                process_passives(self, Events.ON_HIT, hit_ctx)
+
+    def take_damage(self, dmg, damage_type=DamageType.PHYSICAL, source=None):
+        ctx = Context(
+            damage=dmg,
+            type=damage_type,
+            source=source,
+            target=self
+        )
+
+        process_passives(self, Events.ON_DAMAGE_TAKEN, ctx)
+        final_damage = ctx.damage
+
+        self.hp -= final_damage
+
+        if self.hp <= 0:
             self.hp = 0
             self.perder_batalha()
 
+        return final_damage
+
+    # =========================
+    # State
+    # =========================
     def perder_batalha(self):
         self.life = max(0, self.life - 1)
         self.stamina = max(0, self.stamina - 1)
+
         print("Você perdeu a batalha!")
         print(f"Vida: {self.life} | Stamina {self.stamina}")
 
@@ -96,4 +182,4 @@ class Player:
     def reset_combat(self):
         self.hp = self.max_hp
         self.attack_timer = 0
-        self.effects.clear()
+        self.status.clear()
