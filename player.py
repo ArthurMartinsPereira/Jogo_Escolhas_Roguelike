@@ -1,4 +1,5 @@
-from Combat.passives import Context, Events, process_passives, DamageType
+from Combat.core import Context, Events, process_passives, DamageType
+from Combat.status import process_status_effects
 
 
 # =========================
@@ -93,20 +94,10 @@ class Player:
         process_passives(self, Events.GET_ATTACK_SPEED, ctx)
         return getattr(ctx, "speed", self.stats.get("agi", 10))
 
-    def process_status_effects(self):
-        if "bleed" in self.status:
-            bleed = self.status["bleed"]
-
-            self.take_damage(bleed["damage"], DamageType.BLEED)
-
-            bleed["duration"] -= 1
-            if bleed["duration"] <= 0:
-                del self.status["bleed"]
-
     def tick(self):
         ctx = Context(source=self, target=self, is_tick=True)
         process_passives(self, Events.ON_TICK, ctx)
-        self.process_status_effects()
+        process_status_effects(self)
 
     def attack(self, target):
         damage_instances = []
@@ -118,6 +109,9 @@ class Player:
                 "type": DamageType.PHYSICAL
             })
 
+        if not damage_instances:
+            return
+
         ctx = Context(
             source=self,
             target=target,
@@ -127,8 +121,8 @@ class Player:
         process_passives(self, Events.ON_ATTACK, ctx)
 
         # Protections
-        damage_instances = getattr(ctx, "damage_instances", [])
-        total_hits = max(1, 1 + getattr(ctx, "extra_hits", 0))
+        damage_instances = ctx.damage_instances
+        total_hits = max(1, 1 + ctx.extra_hits)
 
         for _ in range(total_hits):
             for dmg in damage_instances:
@@ -158,7 +152,7 @@ class Player:
         process_passives(self, Events.ON_DAMAGE_TAKEN, ctx)
         final_damage = ctx.damage
 
-        self.hp -= final_damage
+        self.hp = max(0, self.hp - final_damage)
 
         if self.hp <= 0:
             self.hp = 0

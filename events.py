@@ -1,5 +1,5 @@
 import random
-from combat import Enemy, battle
+from battle import Enemy, battle
 
 
 def random_event(player):

@@ -1,3 +1,4 @@
+"""
 # Registro de Passivas:
 PASSIVES = {}
 MAX_PASSIVE_LEVEL = 4
@@ -300,3 +301,4 @@ def multi_strike(event, ctx, level):
                 break
 
         ctx.extra_hits = min(ctx.extra_hits + hits, ctx.max_extra_hits)
+        """
