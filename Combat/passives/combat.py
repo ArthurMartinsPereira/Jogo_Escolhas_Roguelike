@@ -15,7 +15,7 @@ def critical_strike(event, ctx, level):
             ctx.crit_multiplier = min(2.5, 1.5 + 0.4 * level)
 
 
-@register_passive("_apply_crit", "", priority=20)
+@register_passive("apply_crit", "", priority=20)
 def apply_crit(event, ctx, level):
     if event == Events.ON_ATTACK and getattr(ctx, "is_crit", False):
         multiplier = getattr(ctx, "crit_multiplier", 1)

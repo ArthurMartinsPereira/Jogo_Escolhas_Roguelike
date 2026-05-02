@@ -48,7 +48,14 @@ class Player:
     # Calculations
     # =========================
     def calculate_hp(self):
-        return self.stats.get("con", 10) * 10
+        base = self.stats.get("con", 10) * 10
+
+        bonus = 0
+        for item in self.equipament.values():
+            if item and hasattr(item, "hp_bonus"):
+                bonus += item.hp_bonus
+
+        return base + bonus
 
     def calculate_life_stamina(self):
         return 4 + (self.stats["con"] // 3)
@@ -87,6 +94,65 @@ class Player:
                 self.stamina = min(self.stamina, new_max)
 
     # =========================
+    # Equip Items
+    # =========================
+    def equip(self, item, slot=None, update=False):
+        slot = slot or getattr(item, "slot", None)
+
+        if not slot:
+            raise ValueError(f"Item '{item.name}' não tem slot definido")
+
+        if slot not in self.equipament:
+            raise ValueError(f"Slot inválido: {slot}")
+
+        # ===== DUAS MÃOS =====
+        if hasattr(item, "hands") and item.hands == 2:
+            self.unequip("handR", update=False)
+            self.unequip("handL", update=False)
+
+            self.equipament["handR"] = item
+            self.equipament["handL"] = item
+
+        else:
+            currentR = self.equipament.get("handR")
+            if currentR and getattr(currentR, "hands", 1) == 2:
+                self.unequip("handR")
+
+            self.unequip(slot, update=False)
+            self.equipament[slot] = item
+
+        if hasattr(item, "on_equip"):
+            item.on_equip(self)
+
+        self.update_hp()
+
+    def equip_artifact(self, item):
+        if not self.equipament["artifact1"]:
+            self.equipament["artifact1"] = item
+        elif not self.equipament["artifact2"]:
+            self.equipament["artifact2"] = item
+        else:
+            self.unequip("artifact1", update=False)
+            self.equipament["artifact1"] = item
+
+        if hasattr(item, "on_equip"):
+            item.on_equip(self)
+
+        self.update_hp()
+
+    def unequip(self, slot, update=True):
+        item = self.equipament.get(slot)
+
+        if item:
+            if hasattr(item, "on_unequip"):
+                item.on_unequip(self)
+
+            self.equipament[slot] = None
+
+            if update:
+                self.update_hp()
+
+    # =========================
     # Combat
     # =========================
     def get_attack_speed(self):
@@ -99,24 +165,38 @@ class Player:
         process_passives(self, Events.ON_TICK, ctx)
         process_status_effects(self)
 
-    def attack(self, target):
+    def get_all_damage_instances(self):
         damage_instances = []
+        processed = set()
 
-        # Basic Attack
-        if not self.equipament["handR"] and not self.equipament["handL"]:
+        for slot in ["handR", "handL"]:
+            item = self.equipament.get(slot)
+
+            if item and id(item) not in processed:
+                if hasattr(item, "get_damage_instances"):
+                    damage_instances.extend(item.get_damage_instances(self))
+                processed.add(id(item))
+
+        return damage_instances
+
+    def attack(self, target):
+        damage_instances = self.get_all_damage_instances()
+
+        # fallback
+        if not damage_instances:
             damage_instances.append({
                 "damage": self.stats.get("str", 5),
                 "type": DamageType.PHYSICAL
             })
-
-        if not damage_instances:
-            return
 
         ctx = Context(
             source=self,
             target=target,
             damage_instances=damage_instances
         )
+
+        if not damage_instances:
+            return
 
         process_passives(self, Events.ON_ATTACK, ctx)
 
@@ -154,11 +234,16 @@ class Player:
 
         self.hp = max(0, self.hp - final_damage)
 
-        if self.hp <= 0:
-            self.hp = 0
+        if self.hp == 0:
             self.perder_batalha()
 
         return final_damage
+
+    def reset_combat(self):
+        self.max_hp = self.calculate_hp()
+        self.hp = self.max_hp
+        self.attack_timer = 0
+        self.status.clear()
 
     # =========================
     # State
