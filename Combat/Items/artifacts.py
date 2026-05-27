@@ -1,9 +1,9 @@
-from .base import Item
+from .base import Artifact
 from .registry import register_item
 
 
 @register_item("vampire_ring")
-class AncientCore(Item):
+class AncientCore(Artifact):
     def __init__(self):
         super().__init__("Anél Vampirico", rarity="rare")
 

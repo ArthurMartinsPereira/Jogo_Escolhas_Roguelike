@@ -1,9 +1,9 @@
-from .base import Item
+from .base import Armor
 from .registry import register_item
 
 
 @register_item("iron_armor")
-class IronArmor(Item):
+class IronArmor(Armor):
     def __init__(self):
         super().__init__("Armadura de Ferro")
 

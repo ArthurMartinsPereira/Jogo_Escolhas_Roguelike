@@ -15,7 +15,7 @@ def regen(event, ctx, level):
     if event == Events.ON_TICK:
         if ctx.source and hasattr(ctx.source, "max_hp"):
             heal = ctx.source.max_hp * (0.02 * level)
-            ctx.source.hp = min(ctx.source.hp_max, ctx.source.hp + heal)
+            ctx.source.hp = min(ctx.source.max_hp, ctx.source.hp + heal)
 
 
 @register_passive("life_steal", "Roubo de Vida: {value}% do dano causado", value_func=lifesteal_value)

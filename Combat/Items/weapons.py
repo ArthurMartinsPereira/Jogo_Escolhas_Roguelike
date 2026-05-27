@@ -1,23 +1,11 @@
-from .base import Item
+from .base import Weapon
 from .registry import register_item
 from Combat.core import DamageType
 
 
-def get_damage_instances(self, player):
-    damage = self.base_damage
-
-    for stat, scale in self.scaling.items():
-        damage += player.stats.get(stat, 0) * scale
-
-    return [{
-        "damage": damage,
-        "type": self.damage_type
-    }]
-
-
 # Registrar Armas:
 @register_item("steel_longsword")
-class SteelLongsword(Item):
+class SteelLongsword(Weapon):
     def __init__(self):
         super().__init__("Espada de Aço Longa", rarity="common")
         self.hands = 2
@@ -33,5 +21,12 @@ class SteelLongsword(Item):
             {"name": "bleed", "level": 1},
             {"name": "sharpness", "level": 1}
         ]
+
+        self.tags.extend([
+            "sword",
+            "steel",
+            "two_handed"
+        ])
+
         self.value = 45
         self.description = "Uma lâmina longa feita de aço, eficiente contra inimigos com pouca armadura."

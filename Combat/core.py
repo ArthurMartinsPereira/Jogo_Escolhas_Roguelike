@@ -31,13 +31,12 @@ def create_passive(name, level=1):
 
 
 def has_passive(entity, name):
-    return any(p["name"] == name for p in entity.passives)
+    return name in entity.passives
 
 
-def get_passive_description(passive):
-    data = PASSIVES.get(passive["name"], {})
+def get_passive_description(name, level):
+    data = PASSIVES.get(name, {})
     desc = data.get("description", "")
-    level = passive.get("level", 1)
 
     value_func = data.get("value_func")
     value = value_func(level) if value_func else None
@@ -71,33 +70,32 @@ def process_passives(entity, event, context):
     passives = getattr(entity, "passives", [])
 
     sorted_passives = sorted(
-        passives,
-        key=lambda p: PASSIVES.get(p["name"], {}).get("priority", 0)
+        passives.items(),
+        key=lambda p: PASSIVES.get(p[0], {}).get("priority", 0)
     )
 
-    for passive in sorted_passives:
-        name = passive.get("name")
+    for name, level in sorted_passives:
         data = PASSIVES.get(name)
 
         if data:
             func = data["func"]
-            level = passive.get("level", 1)
             func(event, context, level)
 
 
 def add_passive(entity, new_passive):
+
     if not hasattr(entity, "passives"):
-        entity.passives = []
+        entity.passives = {}
 
-    for p in entity.passives:
-        if p["name"] == new_passive["name"]:
-            data = PASSIVES.get(p["name"], {})
-            max_level = data.get("max_level", MAX_PASSIVE_LEVEL)
+    name = new_passive["name"]
+    level = new_passive.get("level", 1)
 
-            p["level"] = min(max_level, p["level"] + new_passive.get("level", 1))
-            return
+    data = PASSIVES.get(name, {})
+    max_level = data.get("max_level", MAX_PASSIVE_LEVEL)
 
-    entity.passives.append({
-        "name": new_passive["name"],
-        "level": min(new_passive.get("level", 1), PASSIVES[new_passive["name"]].get("max_level", MAX_PASSIVE_LEVEL))
-    })
+    current = entity.passives.get(name, 0)
+
+    entity.passives[name] = min(
+        max_level,
+        current + level
+    )

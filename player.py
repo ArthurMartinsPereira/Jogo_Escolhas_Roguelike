@@ -1,12 +1,13 @@
 from Combat.core import Context, Events, process_passives, DamageType
 from Combat.status import process_status_effects
+from Combat.passives.registry import PASSIVES, MAX_PASSIVE_LEVEL
 
 
 # =========================
 # Stats:
 # =========================
 class Player:
-    def __init__(self, name, passives=None):
+    def __init__(self, name):
         # Stats
         self.name = name
         self.level = 1
@@ -27,7 +28,7 @@ class Player:
         self.life = 4
         self.stamina = 4
 
-        self.passives = passives if passives else []
+        self.passives = {}
         self.status = {}
 
         self.attack_timer = 0
@@ -121,8 +122,7 @@ class Player:
             self.unequip(slot, update=False)
             self.equipament[slot] = item
 
-        if hasattr(item, "on_equip"):
-            item.on_equip(self)
+        self.rebuild_passives()
 
         self.update_hp()
 
@@ -144,13 +144,44 @@ class Player:
         item = self.equipament.get(slot)
 
         if item:
-            if hasattr(item, "on_unequip"):
-                item.on_unequip(self)
-
             self.equipament[slot] = None
+            self.rebuild_passives()
 
             if update:
                 self.update_hp()
+
+    def rebuild_passives(self):
+        self.passives = {}
+
+        processed = set()
+
+        for item in self.equipament.values():
+
+            if not item:
+                continue
+
+            if id(item) in processed:
+                continue
+
+            processed.add(id(item))
+
+            for passive in item.passives:
+
+                name = passive["name"]
+                level = passive.get("level", 1)
+
+                if name not in self.passives:
+                    self.passives[name] = 0
+
+                max_level = PASSIVES.get(name, {}).get(
+                    "max_level",
+                    MAX_PASSIVE_LEVEL
+                )
+
+                self.passives[name] = min(
+                    max_level,
+                    self.passives[name] + level
+                )
 
     # =========================
     # Combat
@@ -257,8 +288,3 @@ class Player:
 
     def is_alive(self):
         return self.life > 0
-
-    def reset_combat(self):
-        self.hp = self.max_hp
-        self.attack_timer = 0
-        self.status.clear()
