@@ -97,7 +97,7 @@ class Player:
     # =========================
     # Equip Items
     # =========================
-    def equip(self, item, slot=None, update=False):
+    def equip(self, item, slot=None, update=True):
         slot = slot or getattr(item, "slot", None)
 
         if not slot:
@@ -108,53 +108,63 @@ class Player:
 
         # ===== DUAS MÃOS =====
         if hasattr(item, "hands") and item.hands == 2:
-            self.unequip("handR", update=False)
-            self.unequip("handL", update=False)
+            self.unequip("handR", update=False, rebuild=False)
+            self.unequip("handL", update=False, rebuild=False)
 
             self.equipament["handR"] = item
             self.equipament["handL"] = item
 
         else:
             currentR = self.equipament.get("handR")
-            if currentR and getattr(currentR, "hands", 1) == 2:
-                self.unequip("handR")
 
-            self.unequip(slot, update=False)
+            # Remover arma de duas mãos equipada
+            if currentR and getattr(currentR, "hands", 1) == 2:
+                self.unequip("handR", update=False, rebuild=False)
+                self.unequip("handL", update=False, rebuild=False)
+
+            self.unequip(slot, update=False, rebuild=False)
             self.equipament[slot] = item
+
+        self.rebuild_passives()
+
+        if update:
+            self.update_hp()
+
+    def equip_artifact(self, item):
+
+        if not self.equipament["artifact1"]:
+            self.equipament["artifact1"] = item
+
+        elif not self.equipament["artifact2"]:
+            self.equipament["artifact2"] = item
+
+        else:
+            self.equipament["artifact1"] = item
 
         self.rebuild_passives()
 
         self.update_hp()
 
-    def equip_artifact(self, item):
-        if not self.equipament["artifact1"]:
-            self.equipament["artifact1"] = item
-        elif not self.equipament["artifact2"]:
-            self.equipament["artifact2"] = item
-        else:
-            self.unequip("artifact1", update=False)
-            self.equipament["artifact1"] = item
-
-        if hasattr(item, "on_equip"):
-            item.on_equip(self)
-
-        self.update_hp()
-
-    def unequip(self, slot, update=True):
+    def unequip(self, slot, update=True, rebuild=True):
         item = self.equipament.get(slot)
 
-        if item:
-            self.equipament[slot] = None
+        if not item:
+            return
+
+        self.equipament[slot] = None
+
+        if rebuild:
             self.rebuild_passives()
 
-            if update:
-                self.update_hp()
+        if update:
+            self.update_hp()
 
     def rebuild_passives(self):
         self.passives = {}
 
         processed = set()
 
+        # Passivas de equipamentos
         for item in self.equipament.values():
 
             if not item:
@@ -166,22 +176,47 @@ class Player:
             processed.add(id(item))
 
             for passive in item.passives:
+                self.add_passive_to_pool(passive)
 
-                name = passive["name"]
-                level = passive.get("level", 1)
+        # Passivas de atributos
+        for passive in self.get_stat_passives():
+            self.add_passive_to_pool(passive)
 
-                if name not in self.passives:
-                    self.passives[name] = 0
+    def get_stat_passives(self):
+        passives = []
 
-                max_level = PASSIVES.get(name, {}).get(
-                    "max_level",
-                    MAX_PASSIVE_LEVEL
-                )
+        if self.stats["str"] >= 15:
+            passives.append({
+                "name": "brutality",
+                "level": 1
+            })
 
-                self.passives[name] = min(
-                    max_level,
-                    self.passives[name] + level
-                )
+        if self.stats["str"] >= 25:
+            passives.append({
+                "name": "brutality",
+                "level": 1
+            })
+
+        return passives
+
+    def add_passive_to_pool(self, passive):
+        name = passive["name"]
+        level = passive.get("level", 1)
+
+        if name not in self.passives:
+            self.passives[name] = 0
+
+        max_level = PASSIVES.get(
+            name, {}
+        ).get(
+            "max_level",
+            MAX_PASSIVE_LEVEL
+        )
+
+        self.passives[name] = min(
+            max_level,
+            self.passives[name] + level
+        )
 
     # =========================
     # Combat

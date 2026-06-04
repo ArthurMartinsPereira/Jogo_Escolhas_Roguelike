@@ -15,7 +15,6 @@ class Equipment(Item):
         self.tags.append("equipment")
 
 
-
 class Weapon(Equipment):
     def __init__(self, name, rarity="common"):
         super().__init__(name, rarity)
