@@ -1,14 +1,15 @@
-from Combat.core import Context, Events, process_passives, DamageType
-from Combat.status import process_status_effects
 from Combat.passives.registry import PASSIVES, MAX_PASSIVE_LEVEL
+from Combat.entity import Entity
+from Combat.core import DamageType
 
 
 # =========================
 # Stats:
 # =========================
-class Player:
+class Player(Entity):
     def __init__(self, name):
         # Stats
+        super().__init__()
         self.name = name
         self.level = 1
         self.xp = 0
@@ -22,17 +23,6 @@ class Player:
             "pre": 6
         }
 
-        # Hp, Stamina and Life Points
-        self.max_hp = self.calculate_hp()
-        self.hp = self.max_hp
-        self.life = 4
-        self.stamina = 4
-
-        self.passives = {}
-        self.status = {}
-
-        self.attack_timer = 0
-
         # Equipamentos
         self.equipament = {
             "armor": None,
@@ -44,6 +34,14 @@ class Player:
 
         self.inventory = []
         self.gold = 10
+
+        # Hp, Stamina and Life Points
+        self.max_hp = self.calculate_hp()
+        self.hp = self.max_hp
+        self.life = 4
+        self.stamina = 4
+
+        self.passives = {}
 
     # =========================
     # Calculations
@@ -93,6 +91,7 @@ class Player:
                 new_max = self.calculate_life_stamina()
                 self.life = min(self.life, new_max)
                 self.stamina = min(self.stamina, new_max)
+        self.rebuild_passives()
 
     # =========================
     # Equip Items
@@ -175,7 +174,7 @@ class Player:
 
             processed.add(id(item))
 
-            for passive in item.passives:
+            for passive in getattr(item, "passives", []):
                 self.add_passive_to_pool(passive)
 
         # Passivas de atributos
@@ -221,16 +220,6 @@ class Player:
     # =========================
     # Combat
     # =========================
-    def get_attack_speed(self):
-        ctx = Context(source=self, speed=self.stats.get("agi", 10))
-        process_passives(self, Events.GET_ATTACK_SPEED, ctx)
-        return getattr(ctx, "speed", self.stats.get("agi", 10))
-
-    def tick(self):
-        ctx = Context(source=self, target=self, is_tick=True)
-        process_passives(self, Events.ON_TICK, ctx)
-        process_status_effects(self)
-
     def get_all_damage_instances(self):
         damage_instances = []
         processed = set()
@@ -240,81 +229,31 @@ class Player:
 
             if item and id(item) not in processed:
                 if hasattr(item, "get_damage_instances"):
-                    damage_instances.extend(item.get_damage_instances(self))
+                    damage_instances.extend(
+                        item.get_damage_instances(self)
+                    )
+
                 processed.add(id(item))
 
-        return damage_instances
-
-    def attack(self, target):
-        damage_instances = self.get_all_damage_instances()
-
-        # fallback
+        # Ataque desarmado
         if not damage_instances:
             damage_instances.append({
                 "damage": self.stats.get("str", 5),
                 "type": DamageType.PHYSICAL
             })
 
-        ctx = Context(
-            source=self,
-            target=target,
-            damage_instances=damage_instances
-        )
-
-        if not damage_instances:
-            return
-
-        process_passives(self, Events.ON_ATTACK, ctx)
-
-        # Protections
-        damage_instances = ctx.damage_instances
-        total_hits = max(1, 1 + ctx.extra_hits)
-
-        for _ in range(total_hits):
-            for dmg in damage_instances:
-                final_damage = target.take_damage(
-                    dmg["damage"],
-                    dmg["type"],
-                    source=self
-                )
-
-                hit_ctx = Context(
-                    damage=final_damage,
-                    type=dmg["type"],
-                    source=self,
-                    target=target
-                )
-
-                process_passives(self, Events.ON_HIT, hit_ctx)
-
-    def take_damage(self, dmg, damage_type=DamageType.PHYSICAL, source=None):
-        ctx = Context(
-            damage=dmg,
-            type=damage_type,
-            source=source,
-            target=self
-        )
-
-        process_passives(self, Events.ON_DAMAGE_TAKEN, ctx)
-        final_damage = ctx.damage
-
-        self.hp = max(0, self.hp - final_damage)
-
-        if self.hp == 0:
-            self.perder_batalha()
-
-        return final_damage
+        return damage_instances
 
     def reset_combat(self):
+        super().reset_combat()
+
         self.max_hp = self.calculate_hp()
         self.hp = self.max_hp
-        self.attack_timer = 0
-        self.status.clear()
 
     # =========================
     # State
     # =========================
-    def perder_batalha(self):
+    def on_death(self):
         self.life = max(0, self.life - 1)
         self.stamina = max(0, self.stamina - 1)
 

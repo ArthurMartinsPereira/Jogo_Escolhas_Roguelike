@@ -56,6 +56,8 @@ class Context:
         self.source = None
         self.target = None
 
+        self.speed = 0
+
         self.damage_instances = []
         self.extra_hits = 0
         self.max_extra_hits = 5

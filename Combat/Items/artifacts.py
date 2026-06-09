@@ -3,7 +3,7 @@ from .registry import register_item
 
 
 @register_item("vampire_ring")
-class AncientCore(Artifact):
+class VampireRing(Artifact):
     def __init__(self):
         super().__init__("Anél Vampirico", rarity="rare")
 
