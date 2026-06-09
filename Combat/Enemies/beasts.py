@@ -8,7 +8,7 @@ class Wolf(Enemy):
     def __init__(self):
         super().__init__(
             name="Lobo",
-            hp=45,
+            hp=55,
             damage=8,
             passives={
                 "sharpness": 1
