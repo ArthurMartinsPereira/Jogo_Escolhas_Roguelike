@@ -9,6 +9,7 @@ class Events:
     ON_TICK = "on_tick"
     ON_BATTLE_START = "on_battle_start"
     ON_KILL = "on_kill"
+    ON_DEATH = "on_death"
 
 
 class DamageType:

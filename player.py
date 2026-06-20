@@ -260,5 +260,8 @@ class Player(Entity):
         print("Você perdeu a batalha!")
         print(f"Vida: {self.life} | Stamina {self.stamina}")
 
-    def is_alive(self):
+    def has_lives(self):
+        return self.life > 0
+
+    # def is_alive(self):
         return self.life > 0

@@ -37,6 +37,9 @@ class Entity:
         return ctx.speed
 
     def tick(self):
+        if not self.is_alive():
+            return
+
         ctx = Context(
             source=self,
             target=self,
@@ -58,6 +61,12 @@ class Entity:
         }]
 
     def attack(self, target):
+        if not self.is_alive():
+            return
+
+        if not target.is_alive():
+            return
+
         damage_instances = self.get_all_damage_instances()
 
         if not damage_instances:
@@ -122,12 +131,24 @@ class Entity:
 
         final_damage = ctx.damage
 
+        was_alive = self.hp > 0
+
         self.hp = max(
             0,
             self.hp - final_damage
         )
 
-        if self.hp == 0:
+        if was_alive and self.hp == 0:
+            death_ctx = Context(
+                source=source,
+                target=self
+            )
+
+            process_passives(
+                self,
+                Events.ON_DEATH,
+                death_ctx
+            )
             self.on_death()
 
         return final_damage
