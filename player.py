@@ -81,6 +81,9 @@ class Player(Entity):
         print(f"Level Up! Nível: {self.level}")
         print(f"Pontos disponíveis: {self.stat_points}")
 
+    def spend_stat_points(self):
+        pass
+
     def increase_stat(self, stat, amount=1):
         if self.stat_points >= amount:
             self.stats[stat] += amount
@@ -265,3 +268,21 @@ class Player(Entity):
 
     # def is_alive(self):
         return self.life > 0
+
+    # =========================
+    # Inventory
+    # =========================
+
+    def add_item(self, item):
+        self.inventory.append(item)
+
+    def remove_item(self, item):
+        if item in self.inventory:
+            self.inventory.remove(item)
+
+    def use_item(self, item):
+        item.use(self)
+        self.remove_item(item)
+
+    def show_inventory(self):
+        pass
