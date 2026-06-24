@@ -1,7 +1,20 @@
 EVENTS = {}
 
 def register_event(name):
-    pass
+
+    def wrapper(cls):
+
+        EVENTS[name] = cls
+
+        return cls
+
+    return wrapper
 
 def create_event(name):
-    pass
+
+    if name not in EVENTS:
+        raise ValueError(
+            f"Evento '{name}' não existe!"
+        )
+
+    return EVENTS[name]()

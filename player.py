@@ -1,6 +1,7 @@
 from Combat.passives.registry import PASSIVES, MAX_PASSIVE_LEVEL
 from Combat.entity import Entity
 from Combat.core import DamageType
+import random
 
 
 # =========================
@@ -43,6 +44,9 @@ class Player(Entity):
 
         self.passives = {}
 
+        # Events
+        self.completed_events = set()
+
     # =========================
     # Calculations
     # =========================
@@ -76,13 +80,44 @@ class Player(Entity):
         self.level += 1
         self.xp -= self.xp_cap
         self.xp_cap += 5
+
         self.stat_points += 3
 
-        print(f"Level Up! Nível: {self.level}")
-        print(f"Pontos disponíveis: {self.stat_points}")
+        print(f"\nLevel Up! ({self.level})")
+
+        self.spend_stat_points()
 
     def spend_stat_points(self):
-        pass
+
+        while self.stat_points > 0:
+
+            print("\n=== LEVEL UP ===")
+            print(f"Pontos disponíveis: {self.stat_points}")
+
+            print("1 - STR")
+            print("2 - CON")
+            print("3 - AGI")
+            print("4 - INT")
+            print("5 - PRE")
+            print("0 - Sair")
+
+            choice = input("> ")
+
+            mapping = {
+                "1": "str",
+                "2": "con",
+                "3": "agi",
+                "4": "int",
+                "5": "pre"
+            }
+
+            if choice == "0":
+                break
+
+            stat = mapping.get(choice)
+
+            if stat:
+                self.increase_stat(stat)
 
     def increase_stat(self, stat, amount=1):
         if self.stat_points >= amount:
@@ -95,6 +130,14 @@ class Player(Entity):
                 self.life = min(self.life, new_max)
                 self.stamina = min(self.stamina, new_max)
         self.rebuild_passives()
+
+    def check_stat(self, stat, difficulty):
+
+        roll = random.randint(1, 20)
+
+        total = roll + self.stats[stat]
+
+        return total >= difficulty
 
     # =========================
     # Equip Items
@@ -285,4 +328,15 @@ class Player(Entity):
         self.remove_item(item)
 
     def show_inventory(self):
-        pass
+        if not self.inventory:
+            print("\nInventário vazio.")
+            return
+
+        print("\n=== INVENTÁRIO ===")
+
+        for i, item in enumerate(self.inventory, start=1):
+            print(
+                f"{i}. {item.name} "
+                f"({item.item_type}) "
+                f"[{item.rarity}]"
+            )
