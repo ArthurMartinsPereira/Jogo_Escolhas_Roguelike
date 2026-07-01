@@ -309,9 +309,6 @@ class Player(Entity):
     def has_lives(self):
         return self.life > 0
 
-    # def is_alive(self):
-        return self.life > 0
-
     # =========================
     # Inventory
     # =========================

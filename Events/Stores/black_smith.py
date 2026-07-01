@@ -1,7 +1,6 @@
 from Events.base import Event
 from Events.registry import register_event
 
-
 @register_event("dwarven_smith")
 class DwarvenSmith(Event):
 
@@ -18,6 +17,7 @@ class DwarvenSmith(Event):
 
         print("1 - Loja")
         print("2 - Ignorar")
+
 
 
 @register_event("black_smith")
