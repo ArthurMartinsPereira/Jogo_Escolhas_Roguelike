@@ -5,6 +5,7 @@ from Events.registry import register_event
 class Goblin(Event):
 
     title = "Goblin"
+    category = "combat"
 
     description = (
         "Um globin bloqueia seu caminho,"
@@ -19,7 +20,9 @@ class Goblin(Event):
 
 @register_event("skeleton")
 class Skeleton(Event):
+
     title = "Esqueleto"
+    category = "combat"
 
     description = (
         "Um esqueleto aparece para te atacar,"
@@ -34,7 +37,9 @@ class Skeleton(Event):
 
 @register_event("bandit")
 class Bandit(Event):
+
     title = "Bandido"
+    category = "combat"
 
     description = (
         "Um bandido surge para te atacar,"

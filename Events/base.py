@@ -58,13 +58,28 @@ class Event:
 
         print(f"Você recebeu {item.name}.")
 
+    def reward_xp(self, player, amount):
+        player.gain_xp(amount)
+        print(f"Você recebeu {amount} XP.")
+
     def lose_stamina(self, player, amount):
         player.lose_stamina(amount)
-        print("Você gastou 1 ponto de stamina.")
+        print(f"Você gastou {amount} ponto(s) de stamina.")
 
     def lose_life(self, player, amount):
         player.lose_life(amount)
-        print("Você perdeu 1 ponto de vida.")
+        print(f"Você perdeu {amount} ponto(s) de vida.")
+
+    def recover_stamina(self, player, amount):
+        player.recover_stamina(amount)
+        print(f"Você recuperou {amount} ponto(s) de stamina.")
+
+    def recover_life(self, player, amount):
+        player.recover_life(amount)
+        print(f"Você recuperou {amount} ponto(s) de vida.")
+
+    def message(self, text):
+        print(text)
 
     def run(self, player):
         pass

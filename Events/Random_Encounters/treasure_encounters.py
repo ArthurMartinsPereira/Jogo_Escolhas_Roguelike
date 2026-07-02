@@ -5,6 +5,7 @@ from Events.registry import register_event
 class SmallTreasureChest(Event):
 
     title = "Pequeno Baú do Tesouro"
+    category = "treasure"
 
     description = (
         "Enquanto você passava por algumas velhas ruínas, você"
@@ -25,6 +26,7 @@ class SmallTreasureChest(Event):
 class TreasureChest(Event):
 
     title = "Baú do Tesouro"
+    category = "treasure"
 
     description = (
         "Enquanto você passeava por uma praia você nota um"
@@ -44,6 +46,7 @@ class TreasureChest(Event):
 class RegalTreasureChest(Event):
 
     title = "Belo Baú do Tesouro"
+    category = "treasure"
 
     description = (
         "Após um tempo caminhando uma densa neblina surge e você "

@@ -1,21 +1,13 @@
+import Events
 from player import Player
-from events import random_event
+from Events.event_manager import EventManager
 
+player = Player("Arthur")
 
-def game_loop():
-    player = Player()
+events = EventManager()
 
-    while player.is_alive():
-        print("---New Event---")
-        random_event(player)
+while player.has_lives():
 
-        print(f"Lives: {player.life}| Stamina: {player.stamina}")
+    events.run_random_event(player)
 
-        if player.xp >= 20:
-            player.level_up()
-
-    print("Game Over")
-
-
-if __name__ == "__main__":
-    game_loop()
+    input("\nPressione ENTER para continuar...")

@@ -17,4 +17,7 @@ def create_event(name):
             f"Evento '{name}' não existe!"
         )
 
-    return EVENTS[name]()
+    event = EVENTS[name]()
+    event.id = name
+
+    return event

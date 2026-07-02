@@ -5,6 +5,7 @@ from Events.registry import register_event
 class DwarvenSmith(Event):
 
     title = "Anão Ferreiro"
+    category = "store"
 
     description = (
         "Você encontra um velho Anão Ferreiro na estrada,"
@@ -22,7 +23,9 @@ class DwarvenSmith(Event):
 
 @register_event("black_smith")
 class Smith(Event):
+
     title = "Ferreiro"
+    category = "store"
 
     description = (
         "Você entra em uma Ferraria"
@@ -37,7 +40,9 @@ class Smith(Event):
 
 @register_event("magic_shop")
 class MagicShop(Event):
+
     title = "Loja Mágica"
+    category = "store"
 
     description = (
         "Você entra em uma loja de items mágicos"
