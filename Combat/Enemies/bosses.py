@@ -11,8 +11,10 @@ class AlphaWolf(Enemy):
             hp=160,
             damage=18,
             passives={
+                "ice_resistance": 3,
                 "sharpness": 3,
-                "bleed": 2
+                "bleed": 2,
+                "berserk": 1
             }
         )
 
@@ -31,7 +33,8 @@ class Necromancer(Enemy):
             passives={
                 "life_steal": 2,
                 "dark_damage": 2,
-                "regen": 1
+                "regen": 1,
+                "magic_resistance": 2
             }
         )
 

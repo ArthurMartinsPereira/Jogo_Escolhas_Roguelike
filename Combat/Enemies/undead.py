@@ -11,7 +11,7 @@ class Skeleton(Enemy):
             hp=50,
             damage=9,
             passives={
-                "bone_armor": 1
+                "swiftness": 1
             }
         )
 
@@ -52,3 +52,22 @@ class Wraith(Enemy):
 
         self.xp_reward = 25
         self.gold_reward = 20
+
+@register_enemy("abomination")
+class Abomination(Enemy):
+
+    def __init__(self):
+        super().__init__(
+            name="Abominação",
+            hp=100,
+            damage=18,
+            passives={
+                "physical_resistance": 2,
+                "lightning_resistance": 1,
+                "regen": 1,
+                "berserk": 1
+            }
+        )
+
+        self.xp_reward = 45
+        self.gold_reward = 60

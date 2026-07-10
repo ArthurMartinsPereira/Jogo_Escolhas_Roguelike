@@ -28,7 +28,7 @@ class DireWolf(Enemy):
             damage=20,
             passives={
                 "sharpness": 2,
-                "bleeding": 1
+                "bleed": 1
             },
             attack_speed=12
         )
@@ -44,9 +44,42 @@ class GiantSpider(Enemy):
             hp=35,
             damage=7,
             passives={
-                "poison_attack": 1
+                "poison": 1
             }
         )
 
         self.xp_reward = 8
         self.gold_reward = 5
+
+@register_enemy("snake")
+class GiantSnake(Enemy):
+
+    def __init__(self):
+        super().__init__(
+            name="Cobra Gigante",
+            hp=65,
+            damage=11,
+            passives={
+                "poison": 3
+            }
+        )
+
+        self.xp_reward = 18
+        self.gold_reward = 15
+
+@register_enemy("bear")
+class Bear(Enemy):
+
+    def __init__(self):
+        super().__init__(
+            name="Urso",
+            hp=60,
+            damage=10,
+            passives={
+                "sharpness": 1,
+                "physical_resistance": 2
+            }
+        )
+
+        self.xp_reward = 15
+        self.gold_reward = 10
