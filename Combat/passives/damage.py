@@ -32,6 +32,11 @@ def dark_damage_value(level):
 def light_damage_value(level):
     return level * 10
 
+def elementalist_value(level):
+    return level * 4
+
+def dragon_blood_value(level):
+    return level * 20
 
 @register_passive(
     "bleed",
@@ -178,3 +183,37 @@ def magic_damage(event, ctx, level):
         "damage": magic_damage,
         "type": DamageType.MAGIC
     })
+
+@register_passive(
+    "elementalist",
+    "Aumenta todos os danos elementais em {value}%",
+    value_func=elementalist_value
+)
+def elementalist(event, ctx, level):
+
+    if event == Events.ON_ATTACK:
+
+        if ctx.type in (
+            DamageType.FIRE,
+            DamageType.ICE,
+            DamageType.LIGHTNING,
+            DamageType.LIGHT,
+            DamageType.DARK
+        ):
+            ctx.damage *= (1 + 0.04 * level)
+
+@register_passive(
+    "dragon_blood",
+    "Aumenta o dano de Fogo, Gelo e Raio em {value}%",
+    value_func=dragon_blood_value
+)
+def dragon_blood(event, ctx, level):
+
+    if event == Events.ON_ATTACK:
+
+        if ctx.type in (
+            DamageType.FIRE,
+            DamageType.ICE,
+            DamageType.LIGHTNING
+        ):
+            ctx.damage *= (1 + 0.20 * level)

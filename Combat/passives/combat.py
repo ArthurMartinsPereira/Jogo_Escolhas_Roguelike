@@ -1,10 +1,22 @@
 from .registry import register_passive
-from Combat.core import Events
+from Combat.core import Events, DamageType
 
 def execute_value(level):
     return level * 10
 
 def berserk_value(level):
+    return level * 10
+
+def swiftness_attack(level):
+    return level * 5
+
+def swiftness_dodge(level):
+    return level * 3
+
+def hunter_value(level):
+    return level * 15
+
+def spiked_value(level):
     return level * 10
 
 @register_passive("critical_strike",
@@ -78,3 +90,47 @@ def berserk(event, ctx, level):
         bonus = (1 - hp_ratio) * (0.10 * level)
 
         ctx.damage *= (1 + bonus)
+
+@register_passive(
+    "swiftness",
+    "Aumenta a velocidade de ataque em {value}% e a chance de esquiva.",
+    value_func=swiftness_attack
+)
+def swiftness(event, ctx, level):
+
+    if event == Events.ON_ATTACK_SPEED:
+        ctx.attack_speed *= (1 + 0.05 * level)
+
+    elif event == Events.ON_DODGE:
+        ctx.dodge += 0.03 * level
+
+@register_passive(
+    "hunter",
+    "Causa {value}% mais dano contra Bestas",
+    value_func=hunter_value
+)
+def hunter(event, ctx, level):
+
+    if event == Events.ON_ATTACK:
+
+        if ctx.target.enemy_type == EnemyType.BEAST:
+            ctx.damage *= (1 + 0.15 * level)
+
+@register_passive(
+    "spiked",
+    "Reflete {value}% do dano recebido",
+    value_func=spiked_value
+)
+def spiked(event, ctx, level):
+
+    if event == Events.ON_DAMAGE_TAKEN:
+
+        if ctx.damage <= 0:
+            return
+
+        reflected = ctx.damage * (0.10 * level)
+
+        ctx.attacker.take_damage(
+            reflected,
+            DamageType.PHYSICAL
+        )

@@ -10,6 +10,8 @@ class Events:
     ON_BATTLE_START = "on_battle_start"
     ON_KILL = "on_kill"
     ON_DEATH = "on_death"
+    ON_DODGE = "on_dodge"
+    ON_ATTACK_SPEED = "on_attack_speed"
 
 
 class DamageType:
