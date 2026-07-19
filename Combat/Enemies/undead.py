@@ -12,7 +12,8 @@ class Skeleton(Enemy):
             damage=9,
             passives={
                 "swiftness": 1
-            }
+            },
+            attack_speed=15
         )
 
         self.xp_reward = 10
@@ -29,7 +30,8 @@ class Ghoul(Enemy):
             damage=11,
             passives={
                 "life_steal": 1
-            }
+            },
+            attack_speed = 13
         )
 
         self.xp_reward = 14
@@ -47,7 +49,8 @@ class Wraith(Enemy):
             passives={
                 "dodge": 2,
                 "dark_damage": 1
-            }
+            },
+            attack_speed=12
         )
 
         self.xp_reward = 25
@@ -66,7 +69,8 @@ class Abomination(Enemy):
                 "lightning_resistance": 1,
                 "regen": 1,
                 "berserk": 1
-            }
+            },
+            attack_speed=8
         )
 
         self.xp_reward = 45

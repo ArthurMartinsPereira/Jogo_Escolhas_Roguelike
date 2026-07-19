@@ -32,6 +32,9 @@ def dark_damage_value(level):
 def light_damage_value(level):
     return level * 10
 
+def poisonous_damage_value(level):
+    return level * 10
+
 def elementalist_value(level):
     return level * 4
 
@@ -94,7 +97,7 @@ def fire_damage(event, ctx, level):
 
     fire_damage = ctx.damage * (0.10 * level)
 
-    ctx.extra_hits.append({
+    ctx.damage_instances.append({
         "damage": fire_damage,
         "type": DamageType.FIRE
     })
@@ -111,7 +114,7 @@ def ice_damage(event, ctx, level):
 
     ice_damage = ctx.damage * (0.10 * level)
 
-    ctx.extra_hits.append({
+    ctx.damage_instances.append({
         "damage": ice_damage,
         "type": DamageType.ICE
     })
@@ -128,7 +131,7 @@ def lightning_damage(event, ctx, level):
 
     lightning_damage = ctx.damage * (0.10 * level)
 
-    ctx.extra_hits.append({
+    ctx.damage_instances.append({
         "damage": lightning_damage,
         "type": DamageType.LIGHTNING
     })
@@ -145,7 +148,7 @@ def light_damage(event, ctx, level):
 
     light_damage = ctx.damage * (0.10 * level)
 
-    ctx.extra_hits.append({
+    ctx.damage_instances.append({
         "damage": light_damage,
         "type": DamageType.LIGHT
     })
@@ -162,7 +165,7 @@ def dark_damage(event, ctx, level):
 
     dark_damage = ctx.damage * (0.10 * level)
 
-    ctx.extra_hits.append({
+    ctx.damage_instances.append({
         "damage": dark_damage,
         "type": DamageType.DARK
     })
@@ -179,9 +182,26 @@ def magic_damage(event, ctx, level):
 
     magic_damage = ctx.damage * (0.10 * level)
 
-    ctx.extra_hits.append({
+    ctx.damage_instances.append({
         "damage": magic_damage,
         "type": DamageType.MAGIC
+    })
+
+@register_passive(
+    "poisonous",
+    "Adiciona {value}% de dano de veneno",
+    value_func=poisonous_damage_value
+)
+def poisonous(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    poisonous = ctx.damage * (0.10 * level)
+
+    ctx.damage_instances.append({
+        "damage": poisonous,
+        "type": DamageType.POISON
     })
 
 @register_passive(

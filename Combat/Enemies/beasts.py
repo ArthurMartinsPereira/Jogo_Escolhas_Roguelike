@@ -30,7 +30,7 @@ class DireWolf(Enemy):
                 "sharpness": 2,
                 "bleed": 1
             },
-            attack_speed=12
+            attack_speed=13
         )
         self.xp_reward = 30
         self.gold_reward = 25
@@ -44,8 +44,9 @@ class GiantSpider(Enemy):
             hp=35,
             damage=7,
             passives={
-                "poison": 1
-            }
+                "poisonous": 1
+            },
+            attack_speed=12
         )
 
         self.xp_reward = 8
@@ -60,8 +61,9 @@ class GiantSnake(Enemy):
             hp=65,
             damage=11,
             passives={
-                "poison": 3
-            }
+                "poisonous": 3
+            },
+            attack_speed=13
         )
 
         self.xp_reward = 18
@@ -74,11 +76,12 @@ class Bear(Enemy):
         super().__init__(
             name="Urso",
             hp=60,
-            damage=10,
+            damage=15,
             passives={
                 "sharpness": 1,
                 "physical_resistance": 2
-            }
+            },
+            attack_speed=10
         )
 
         self.xp_reward = 15

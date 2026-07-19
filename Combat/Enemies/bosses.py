@@ -15,7 +15,8 @@ class AlphaWolf(Enemy):
                 "sharpness": 3,
                 "bleed": 2,
                 "berserk": 1
-            }
+            },
+            attack_speed=15
         )
 
         self.xp_reward = 35
@@ -35,7 +36,8 @@ class Necromancer(Enemy):
                 "dark_damage": 2,
                 "regen": 1,
                 "magic_resistance": 2
-            }
+            },
+            attack_speed=10
         )
 
         self.xp_reward = 35

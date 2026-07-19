@@ -12,7 +12,9 @@ class Goblin(Enemy):
             damage=5,
             passives={
                 "sharpness": 1
-            }
+            },
+            attack_speed=14
+
         )
 
         self.xp_reward = 12
@@ -28,7 +30,8 @@ class Bandit(Enemy):
             damage=10,
             passives={
                 "crit_chance": 1
-            }
+            },
+            attack_speed=14
         )
 
         self.xp_reward = 12
@@ -47,7 +50,8 @@ class Mercenary(Enemy):
                 "crit_chance": 1,
                 "block": 1,
                 "multi-strike": 1
-            }
+            },
+            attack_speed=12
         )
 
         self.xp_reward = 20
@@ -64,7 +68,8 @@ class Duelist(Enemy):
             damage=14,
             passives={
                 "dodge": 2
-            }
+            },
+            attack_speed=17
         )
 
         self.xp_reward = 25
