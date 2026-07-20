@@ -2,6 +2,13 @@ from .registry import register_passive
 from Combat.core import Events, DamageType
 
 
+def get_damage_by_type(ctx, damage_type):
+    return sum(
+        dmg["damage"]
+        for dmg in ctx.damage_instances
+        if dmg["type"] == damage_type
+    )
+
 def bleed_value(lvl):
     return int((0.03 * lvl) * 100)
 
@@ -80,10 +87,16 @@ def bleed(event, ctx, level):
 )
 def sharpness(event, ctx, level):
 
-    if event == Events.ON_ATTACK:
+    if event != Events.ON_ATTACK:
+        return
 
-        if ctx.type == DamageType.PHYSICAL:
-            ctx.damage *= (1 + 0.10 * level)
+    for dmg in ctx.damage_instances:
+
+        if dmg["type"] == DamageType.PHYSICAL:
+
+            dmg["damage"] *= (
+                1 + 0.10 * level
+            )
 
 @register_passive(
     "fire_damage",
@@ -95,7 +108,12 @@ def fire_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    fire_damage = ctx.damage * (0.10 * level)
+    base_damage = get_damage_by_type(
+        ctx,
+        DamageType.PHYSICAL
+    )
+
+    fire_damage = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
         "damage": fire_damage,
@@ -112,7 +130,12 @@ def ice_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    ice_damage = ctx.damage * (0.10 * level)
+    base_damage = get_damage_by_type(
+        ctx,
+        DamageType.PHYSICAL
+    )
+
+    ice_damage = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
         "damage": ice_damage,
@@ -129,7 +152,12 @@ def lightning_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    lightning_damage = ctx.damage * (0.10 * level)
+    base_damage = get_damage_by_type(
+        ctx,
+        DamageType.PHYSICAL
+    )
+
+    lightning_damage = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
         "damage": lightning_damage,
@@ -146,7 +174,12 @@ def light_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    light_damage = ctx.damage * (0.10 * level)
+    base_damage = get_damage_by_type(
+        ctx,
+        DamageType.PHYSICAL
+    )
+
+    light_damage = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
         "damage": light_damage,
@@ -163,7 +196,12 @@ def dark_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    dark_damage = ctx.damage * (0.10 * level)
+    base_damage = get_damage_by_type(
+        ctx,
+        DamageType.PHYSICAL
+    )
+
+    dark_damage = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
         "damage": dark_damage,
@@ -172,7 +210,7 @@ def dark_damage(event, ctx, level):
 
 @register_passive(
     "magic_damage",
-    "Adiciona {value}% de dano mágico",
+    "Adiciona {value}% de dano de magia",
     value_func=magic_damage_value
 )
 def magic_damage(event, ctx, level):
@@ -180,7 +218,12 @@ def magic_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    magic_damage = ctx.damage * (0.10 * level)
+    base_damage = get_damage_by_type(
+        ctx,
+        DamageType.PHYSICAL
+    )
+
+    magic_damage = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
         "damage": magic_damage,
@@ -197,7 +240,12 @@ def poisonous(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    poisonous = ctx.damage * (0.10 * level)
+    base_damage = get_damage_by_type(
+        ctx,
+        DamageType.PHYSICAL
+    )
+
+    poisonous = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
         "damage": poisonous,
@@ -211,16 +259,24 @@ def poisonous(event, ctx, level):
 )
 def elementalist(event, ctx, level):
 
-    if event == Events.ON_ATTACK:
+    if event != Events.ON_ATTACK:
+        return
 
-        if ctx.type in (
-            DamageType.FIRE,
-            DamageType.ICE,
-            DamageType.LIGHTNING,
-            DamageType.LIGHT,
-            DamageType.DARK
-        ):
-            ctx.damage *= (1 + 0.04 * level)
+    elemental_types = (
+        DamageType.FIRE,
+        DamageType.ICE,
+        DamageType.LIGHTNING,
+        DamageType.LIGHT,
+        DamageType.DARK
+    )
+
+    for dmg in ctx.damage_instances:
+
+        if dmg["type"] in elemental_types:
+
+            dmg["damage"] *= (
+                1 + 0.04 * level
+            )
 
 @register_passive(
     "dragon_blood",
@@ -229,11 +285,19 @@ def elementalist(event, ctx, level):
 )
 def dragon_blood(event, ctx, level):
 
-    if event == Events.ON_ATTACK:
+    if event != Events.ON_ATTACK:
+        return
 
-        if ctx.type in (
-            DamageType.FIRE,
-            DamageType.ICE,
-            DamageType.LIGHTNING
-        ):
-            ctx.damage *= (1 + 0.20 * level)
+    dragon_types = (
+        DamageType.FIRE,
+        DamageType.ICE,
+        DamageType.LIGHTNING
+    )
+
+    for dmg in ctx.damage_instances:
+
+        if dmg["type"] in dragon_types:
+
+            dmg["damage"] *= (
+                1 + 0.20 * level
+            )

@@ -133,9 +133,9 @@ class Entity:
 
         was_alive = self.hp > 0
 
-        self.hp = max(
-            0,
-            self.hp - final_damage
+        self.hp = round(
+            max(0, self.hp - final_damage),
+            2
         )
 
         if was_alive and self.hp == 0:
