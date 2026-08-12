@@ -2,6 +2,16 @@ from .registry import register_passive
 from Combat.core import Events, DamageType
 
 
+def get_base_damage(ctx):
+    for dmg in ctx.damage_instances:
+        if dmg["type"] in (
+            DamageType.PHYSICAL,
+            DamageType.MAGIC
+        ):
+            return dmg["damage"]
+
+    return 0
+
 def get_damage_by_type(ctx, damage_type):
     return sum(
         dmg["damage"]
@@ -39,14 +49,18 @@ def dark_damage_value(level):
 def light_damage_value(level):
     return level * 10
 
-def poisonous_damage_value(level):
-    return level * 10
-
 def elementalist_value(level):
     return level * 4
 
 def dragon_blood_value(level):
     return level * 20
+
+def elemental_mastery_value(level):
+    return level * 10
+
+def prismatic_value(level):
+    return level * 5
+
 
 @register_passive(
     "bleed",
@@ -108,10 +122,7 @@ def fire_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    base_damage = get_damage_by_type(
-        ctx,
-        DamageType.PHYSICAL
-    )
+    base_damage = get_base_damage(ctx)
 
     fire_damage = base_damage * (0.10 * level)
 
@@ -130,10 +141,7 @@ def ice_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    base_damage = get_damage_by_type(
-        ctx,
-        DamageType.PHYSICAL
-    )
+    base_damage = get_base_damage(ctx)
 
     ice_damage = base_damage * (0.10 * level)
 
@@ -152,10 +160,7 @@ def lightning_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    base_damage = get_damage_by_type(
-        ctx,
-        DamageType.PHYSICAL
-    )
+    base_damage = get_base_damage(ctx)
 
     lightning_damage = base_damage * (0.10 * level)
 
@@ -174,10 +179,7 @@ def light_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    base_damage = get_damage_by_type(
-        ctx,
-        DamageType.PHYSICAL
-    )
+    base_damage = get_base_damage(ctx)
 
     light_damage = base_damage * (0.10 * level)
 
@@ -196,10 +198,7 @@ def dark_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    base_damage = get_damage_by_type(
-        ctx,
-        DamageType.PHYSICAL
-    )
+    base_damage = get_base_damage(ctx)
 
     dark_damage = base_damage * (0.10 * level)
 
@@ -218,10 +217,7 @@ def magic_damage(event, ctx, level):
     if event != Events.ON_ATTACK:
         return
 
-    base_damage = get_damage_by_type(
-        ctx,
-        DamageType.PHYSICAL
-    )
+    base_damage = get_base_damage(ctx)
 
     magic_damage = base_damage * (0.10 * level)
 
@@ -231,24 +227,21 @@ def magic_damage(event, ctx, level):
     })
 
 @register_passive(
-    "poisonous",
+    "poison",
     "Adiciona {value}% de dano de veneno",
-    value_func=poisonous_damage_value
+    value_func=poison_damage_value
 )
-def poisonous(event, ctx, level):
+def poison(event, ctx, level):
 
     if event != Events.ON_ATTACK:
         return
 
-    base_damage = get_damage_by_type(
-        ctx,
-        DamageType.PHYSICAL
-    )
+    base_damage = get_base_damage(ctx)
 
-    poisonous = base_damage * (0.10 * level)
+    poison_damage = base_damage * (0.10 * level)
 
     ctx.damage_instances.append({
-        "damage": poisonous,
+        "damage": poison_damage,
         "type": DamageType.POISON
     })
 
@@ -301,3 +294,76 @@ def dragon_blood(event, ctx, level):
             dmg["damage"] *= (
                 1 + 0.20 * level
             )
+
+@register_passive(
+    "elemental_mastery",
+    "Aumenta o dano elemental em {value}% quando o ataque possui múltiplos elementos",
+    value_func=elemental_mastery_value
+)
+def elemental_mastery(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    elemental_types = {
+        DamageType.FIRE,
+        DamageType.ICE,
+        DamageType.LIGHTNING,
+        DamageType.LIGHT,
+        DamageType.DARK
+    }
+
+    active_elements = {
+        dmg["type"]
+        for dmg in ctx.damage_instances
+        if dmg["type"] in elemental_types
+        and dmg["damage"] > 0
+    }
+
+    if len(active_elements) < 2:
+        return
+
+    for dmg in ctx.damage_instances:
+
+        if dmg["type"] in elemental_types:
+            dmg["damage"] *= (1 + 0.10 * level)
+
+@register_passive(
+    "prismatic",
+    "Aumenta o dano elemental em até {value}% conforme a variedade elemental",
+    value_func=prismatic_value
+)
+def prismatic(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    elemental_types = {
+        DamageType.FIRE,
+        DamageType.ICE,
+        DamageType.LIGHTNING,
+        DamageType.LIGHT,
+        DamageType.DARK
+    }
+
+    active_elements = {
+        dmg["type"]
+        for dmg in ctx.damage_instances
+        if dmg["type"] in elemental_types
+        and dmg["damage"] > 0
+    }
+
+    element_count = len(active_elements)
+
+    if element_count <= 1:
+        return
+
+    bonus = min(
+        0.05 * (element_count - 1) * level,
+        0.20 * level
+    )
+
+    for dmg in ctx.damage_instances:
+
+        if dmg["type"] in elemental_types:
+            dmg["damage"] *= (1 + bonus)

@@ -44,7 +44,7 @@ class GiantSpider(Enemy):
             hp=35,
             damage=7,
             passives={
-                "poisonous": 1
+                "poison": 1
             },
             attack_speed=12
         )
@@ -61,7 +61,7 @@ class GiantSnake(Enemy):
             hp=65,
             damage=11,
             passives={
-                "poisonous": 3
+                "poison": 3
             },
             attack_speed=13
         )

@@ -12,6 +12,9 @@ def resistance_value(lvl):
 def elemental_resistance_value(lvl):
     return int(min(0.4, 0.1 * lvl) * 100)
 
+def guardian_value(level):
+    return level * 5
+
 @register_passive("fire_resistance",
                   "Reduz dano de fogo em {value}%", value_func=resistance_value)
 def fire_resistance(event, ctx, level):
@@ -52,3 +55,21 @@ def physical_resistance(event, ctx, level):
 def elemental_resistance(event, ctx, level):
     if event == Events.ON_DAMAGE_TAKEN and ctx.type == DamageType.PHYSICAL:
         ctx.damage *= (1 - min(0.4, 0.1 * level))
+
+@register_passive(
+    "guardian",
+    "Reduz o dano recebido em {value}% enquanto estiver com mais de 75% de vida",
+    value_func=guardian_value
+)
+def guardian(event, ctx, level):
+
+    if event != Events.ON_DAMAGE_TAKEN:
+        return
+
+    if ctx.damage <= 0:
+        return
+
+    hp_ratio = ctx.target.hp / ctx.target.max_hp
+
+    if hp_ratio > 0.75:
+        ctx.damage *= (1 - 0.05 * level)

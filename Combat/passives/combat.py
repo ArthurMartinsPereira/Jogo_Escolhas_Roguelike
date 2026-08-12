@@ -19,6 +19,18 @@ def hunter_value(level):
 def spiked_value(level):
     return level * 10
 
+def thorns_value(level):
+    return level * 5
+
+def last_stand_value(level):
+    return level * 10
+
+def momentum_value(level):
+    return level * 5
+
+def piercing_value(level):
+    return level * 10
+
 @register_passive("critical_strike",
                   "Chance de crítico +{value}%",
                   value_func=lambda lvl: min(50, lvl * 10),priority=10)
@@ -134,3 +146,87 @@ def spiked(event, ctx, level):
             reflected,
             DamageType.PHYSICAL
         )
+
+@register_passive(
+    "thorns",
+    "Causa {value} de dano físico ao atacante ao receber dano",
+    value_func=thorns_value
+)
+def thorns(event, ctx, level):
+
+    if event != Events.ON_DAMAGE_TAKEN:
+        return
+
+    if ctx.damage <= 0:
+        return
+
+    damage = 5 * level
+
+    if ctx.attacker is not None:
+        ctx.attacker.take_damage(
+            damage,
+            DamageType.PHYSICAL
+        )
+
+@register_passive(
+    "last_stand",
+    "Reduz o dano recebido em até {value}% conforme sua vida diminui",
+    value_func=last_stand_value
+)
+def last_stand(event, ctx, level):
+
+    if event != Events.ON_DAMAGE_TAKEN:
+        return
+
+    if ctx.damage <= 0:
+        return
+
+    hp_ratio = ctx.target.hp / ctx.target.max_hp
+
+    bonus = (1 - hp_ratio) * (0.10 * level)
+
+    ctx.damage *= (1 - bonus)
+
+@register_passive(
+    "momentum",
+    "Cada ataque consecutivo aumenta o dano em {value}%, até {max_value}%",
+    value_func=momentum_value
+)
+def momentum(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    attacker = ctx.source
+
+    if not hasattr(attacker, "momentum_stacks"):
+        attacker.momentum_stacks = 0
+
+    max_stacks = level
+
+    attacker.momentum_stacks = min(
+        attacker.momentum_stacks + 1,
+        max_stacks
+    )
+
+    bonus = 0.05 * attacker.momentum_stacks
+
+    for dmg in ctx.damage_instances:
+        dmg["damage"] *= (1 + bonus)
+
+@register_passive(
+    "piercing",
+    "Ignora {value}% da defesa do inimigo",
+    value_func=piercing_value
+)
+def piercing(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    if not hasattr(ctx.target, "defense"):
+        return
+
+    ctx.target.defense_modifier = (
+        1 - 0.10 * level
+    )
