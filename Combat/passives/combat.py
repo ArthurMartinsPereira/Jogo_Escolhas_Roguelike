@@ -31,6 +31,24 @@ def momentum_value(level):
 def piercing_value(level):
     return level * 10
 
+def double_edge_value(level):
+    return level * 10
+
+def glass_cannon_value(level):
+    return level * 20
+
+def arcane_resonance_value(level):
+    return level * 2
+
+def evasion_mastery_value(level):
+    return level * 10
+
+def preys_on_the_weak_value(level):
+    return level * 10
+
+def conquer_or_be_conquered_value(level):
+    return level * 10
+
 @register_passive("critical_strike",
                   "Chance de crítico +{value}%",
                   value_func=lambda lvl: min(50, lvl * 10),priority=10)
@@ -115,6 +133,29 @@ def swiftness(event, ctx, level):
 
     elif event == Events.ON_DODGE:
         ctx.dodge += 0.03 * level
+
+@register_passive(
+    "evasion_mastery",
+    "Após esquivar, seu próximo ataque causa +{value}% de dano.",
+    value_func=evasion_mastery_value
+)
+def evasion_mastery(event, ctx, level):
+
+    if event == Events.ON_DODGE:
+
+        ctx.target.evasion_mastery_ready = True
+
+    elif event == Events.ON_ATTACK:
+
+        attacker = ctx.source
+
+        if not getattr(attacker, "evasion_mastery_ready", False):
+            return
+
+        for dmg in ctx.damage_instances:
+            dmg["damage"] *= (1 + 0.10 * level)
+
+        attacker.evasion_mastery_ready = False
 
 @register_passive(
     "hunter",
@@ -230,3 +271,112 @@ def piercing(event, ctx, level):
     ctx.target.defense_modifier = (
         1 - 0.10 * level
     )
+
+@register_passive(
+    "double_edge",
+    "Aumenta o dano causado em {value}%, mas também aumenta o dano recebido em {value}%.",
+    value_func=double_edge_value
+)
+def double_edge(event, ctx, level):
+
+    if event == Events.ON_ATTACK:
+
+        for dmg in ctx.damage_instances:
+            dmg["damage"] *= (1 + 0.10 * level)
+
+    elif event == Events.ON_DAMAGE_TAKEN:
+
+        if ctx.damage <= 0:
+            return
+
+        ctx.damage *= (1 + 0.10 * level)
+
+@register_passive(
+    "glass_cannon",
+    "Aumenta o dano causado em {value}%, mas aumenta o dano recebido em {damage_taken}%.",
+    value_func=glass_cannon_value
+)
+def glass_cannon(event, ctx, level):
+
+    if event == Events.ON_ATTACK:
+
+        for dmg in ctx.damage_instances:
+            dmg["damage"] *= (1 + 0.20 * level)
+
+    elif event == Events.ON_DAMAGE_TAKEN:
+
+        if ctx.damage <= 0:
+            return
+
+        ctx.damage *= (1 + 0.15 * level)
+
+
+@register_passive(
+    "arcane_resonance",
+    "Aumenta o dano mágico em {value}% a cada 5 pontos de Inteligência.",
+    value_func=arcane_resonance_value
+)
+def arcane_resonance(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    int_stat = ctx.source.stats.get("int", 0)
+
+    bonus = (int_stat // 5) * (0.02 * level)
+
+    for dmg in ctx.damage_instances:
+
+        if dmg["type"] == DamageType.MAGIC:
+            dmg["damage"] *= (1 + bonus)
+
+@register_passive(
+    "death_defiance",
+    "Uma vez por combate, sobrevive a um golpe fatal com 1 de vida."
+)
+def death_defiance(event, ctx, level):
+
+    if event != Events.ON_DAMAGE_TAKEN:
+        return
+
+    target = ctx.target
+
+    if getattr(target, "death_defiance_used", False):
+        return
+
+    if ctx.damage >= target.hp:
+
+        target.death_defiance_used = True
+        ctx.damage = max(0, target.hp - 1)
+
+@register_passive(
+    "preys_on_the_weak",
+    "Causa {value}% mais dano contra inimigos mais fracos que você.",
+    value_func=preys_on_the_weak_value
+)
+def preys_on_the_weak(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    if ctx.target.max_hp >= ctx.source.max_hp:
+        return
+
+    for dmg in ctx.damage_instances:
+        dmg["damage"] *= (1 + 0.10 * level)
+
+@register_passive(
+    "conquer_or_be_conquered",
+    "Causa {value}% mais dano contra inimigos mais fortes que você.",
+    value_func=conquer_or_be_conquered_value
+)
+def conquer_or_be_conquered(event, ctx, level):
+
+    if event != Events.ON_ATTACK:
+        return
+
+    if ctx.target.max_hp <= ctx.source.max_hp:
+        return
+
+    for dmg in ctx.damage_instances:
+        dmg["damage"] *= (1 + 0.10 * level)
