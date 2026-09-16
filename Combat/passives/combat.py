@@ -1,5 +1,6 @@
 from .registry import register_passive
-from Combat.core import Events, DamageType
+from Combat.constants import Events
+from Combat.constants import DamageType
 
 def execute_value(level):
     return level * 10

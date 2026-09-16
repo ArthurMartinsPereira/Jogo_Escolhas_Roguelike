@@ -1,6 +1,6 @@
 from Combat.passives.registry import PASSIVES, MAX_PASSIVE_LEVEL
 from Combat.entity import Entity
-from Combat.core import DamageType
+from Combat.constants import DamageType
 import random
 
 

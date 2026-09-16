@@ -4,7 +4,7 @@ from Combat.battle import Battle
 
 player = Player("Arthur")
 
-enemy = create_enemy("snake")
+enemy = create_enemy("necromancer")
 
 battle = Battle(
     player,

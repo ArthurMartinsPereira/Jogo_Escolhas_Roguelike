@@ -1,5 +1,5 @@
 from .registry import register_passive
-from Combat.core import Events, DamageType
+from Combat.constants import Events, DamageType
 
 
 def lifesteal_value(lvl):

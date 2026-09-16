@@ -1,9 +1,8 @@
 from Combat.core import (
     Context,
-    Events,
-    process_passives,
-    DamageType
+    process_passives
 )
+from Combat.constants import DamageType, Events
 
 from Combat.status import process_status_effects
 

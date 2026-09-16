@@ -1,6 +1,7 @@
 from Events.base import Event
 from Events.registry import register_event
-from Stores import Store
+from Events.Stores_Interface import StoreInterface
+from Events.Stores_Base import Store
 
 
 @register_event("dwarven_smith")
@@ -25,8 +26,18 @@ class DwarvenSmith(Event):
         )
 
         if choice == 1:
-            # abrir sistema de loja
-            pass
+
+            store = Store([
+                "steel_longsword",
+                "iron_sword",
+                "iron_armor",
+                "vampire_ring"
+            ])
+
+            store.generate_stock(player)
+
+            interface = StoreInterface(store)
+            interface.show(player)
 
 
 
@@ -52,10 +63,14 @@ class Smith(Event):
         )
 
         if choice == 1:
+
             store = Store([
                 "iron_sword",
-                "iron_armor"
+                "iron_armor",
+                "steel_longsword"
             ])
 
-            store.show(player)
+            store.generate_stock(player)
 
+            interface = StoreInterface(store)
+            interface.show(player)

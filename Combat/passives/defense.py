@@ -1,5 +1,5 @@
 from .registry import register_passive
-from Combat.core import Events, DamageType
+from Combat.constants import DamageType, Events
 
 
 def block_chance_value(lvl):
@@ -55,7 +55,11 @@ def physical_resistance(event, ctx, level):
                   "Reduz dano de fogo, gelo e raio em {value}%",
                   value_func=elemental_resistance_value)
 def elemental_resistance(event, ctx, level):
-    if event == Events.ON_DAMAGE_TAKEN and ctx.type == DamageType.PHYSICAL:
+    if event == Events.ON_DAMAGE_TAKEN and ctx.type in (
+            DamageType.FIRE,
+            DamageType.ICE,
+            DamageType.LIGHTNING
+    ):
         ctx.damage *= (1 - min(0.4, 0.1 * level))
 
 @register_passive(

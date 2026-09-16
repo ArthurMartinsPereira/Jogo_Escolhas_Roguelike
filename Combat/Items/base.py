@@ -5,6 +5,7 @@ class Item:
         self.description = ""
         self.value = 0
         self.tags = []
+        self.min_level = 1
 
 
 class Equipment(Item):

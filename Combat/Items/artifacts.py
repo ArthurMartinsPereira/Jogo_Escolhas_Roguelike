@@ -7,6 +7,7 @@ class VampireRing(Artifact):
     def __init__(self):
         super().__init__("Anél Vampirico", rarity="rare")
 
+        self.min_level = 4
         self.slot = "artifact"
         self.passives = [
             {"name": "lifesteal", "level": 2},

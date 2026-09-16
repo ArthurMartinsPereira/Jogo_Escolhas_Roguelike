@@ -9,6 +9,7 @@ class IronArmor(Armor):
 
         self.slot = "armor"
         self.hp_bonus = 80
+        self.min_level = 1
 
         self.passives = [
             {"name": "physical_resistance", "level": 1}
