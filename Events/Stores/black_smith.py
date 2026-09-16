@@ -1,23 +1,32 @@
 from Events.base import Event
 from Events.registry import register_event
+from Stores import Store
+
 
 @register_event("dwarven_smith")
 class DwarvenSmith(Event):
 
     title = "Anão Ferreiro"
     category = "store"
+    unique = True
 
     description = (
-        "Você encontra um velho Anão Ferreiro na estrada,"
+        "Você encontra um velho Anão Ferreiro na estrada. "
         "Ele está vendendo alguns equipamentos."
     )
 
     def run(self, player):
 
-        print(self.description)
+        self.show()
 
-        print("1 - Loja")
-        print("2 - Ignorar")
+        choice = self.choose(
+            "Ver a loja",
+            "Ignorar"
+        )
+
+        if choice == 1:
+            # abrir sistema de loja
+            pass
 
 
 
@@ -26,6 +35,7 @@ class Smith(Event):
 
     title = "Ferreiro"
     category = "store"
+    unique = False
 
     description = (
         "Você entra em uma Ferraria"
@@ -33,8 +43,19 @@ class Smith(Event):
     )
 
     def run(self, player):
-        print(self.description)
 
-        print("1 - Loja")
-        print("2 - Ignorar")
+        self.show()
+
+        choice = self.choose(
+            "Ver a loja",
+            "Ignorar"
+        )
+
+        if choice == 1:
+            store = Store([
+                "iron_sword",
+                "iron_armor"
+            ])
+
+            store.show(player)
 

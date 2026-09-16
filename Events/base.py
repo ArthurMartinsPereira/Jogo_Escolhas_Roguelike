@@ -1,9 +1,12 @@
 class Event:
 
+    id = ""
+
     title = ""
     description = ""
 
     unique = False
+    category = "random"
 
     def show(self):
         print(f"\n=== {self.title} ===")
