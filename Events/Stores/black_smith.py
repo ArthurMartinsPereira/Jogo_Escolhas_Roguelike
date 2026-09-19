@@ -1,7 +1,7 @@
 from Events.base import Event
 from Events.registry import register_event
-from Events.Stores_Interface import StoreInterface
 from Events.Stores_Base import Store
+from Events.Stores_Interface import StoreInterface
 
 
 @register_event("dwarven_smith")
@@ -27,18 +27,26 @@ class DwarvenSmith(Event):
 
         if choice == 1:
 
-            store = Store([
-                "steel_longsword",
-                "iron_sword",
-                "iron_armor",
-                "vampire_ring"
-            ])
+            store = Store(
+                [
+                    "steel_longsword",
+                    "iron_sword",
+                    "iron_armor",
+                    "vampire_ring"
+                ],
+                preferred_tags=[
+                    "sword",
+                    "axe",
+                    "mace",
+                    "armor",
+                    "metal"
+                ]
+            )
 
             store.generate_stock(player)
 
             interface = StoreInterface(store)
             interface.show(player)
-
 
 
 @register_event("black_smith")
@@ -68,7 +76,15 @@ class Smith(Event):
                 "iron_sword",
                 "iron_armor",
                 "steel_longsword"
-            ])
+            ],
+                preferred_tags=[
+                    "sword",
+                    "axe",
+                    "mace",
+                    "armor",
+                    "metal"
+                ]
+            )
 
             store.generate_stock(player)
 

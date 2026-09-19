@@ -15,6 +15,9 @@ class IronArmor(Armor):
             {"name": "physical_resistance", "level": 1}
         ]
 
+        self.value = 25
+        self.description = "Uma armadura básica feita de ferro."
+
     def on_equip(self, player):
         super().on_equip(player)
 

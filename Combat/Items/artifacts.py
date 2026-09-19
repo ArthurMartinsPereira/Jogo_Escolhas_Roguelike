@@ -13,3 +13,6 @@ class VampireRing(Artifact):
             {"name": "lifesteal", "level": 2},
             {"name": "regen", "level": 2}
         ]
+
+        self.value = 120
+        self.description = "Um anel negro misterioso que tem o poder de drenar a força vital de outros seres."

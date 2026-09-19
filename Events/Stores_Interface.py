@@ -56,3 +56,15 @@ class StoreInterface:
             f"Você comprou {item.name} "
             f"por {item.value} moedas."
         )
+
+    def sell(self, player, item):
+
+        price = self.store.get_sell_price(player, item)
+
+        player.remove_item(item)
+        player.gold += price
+
+        print(
+            f"Você vendeu {item.name} "
+            f"por {price} moedas."
+        )

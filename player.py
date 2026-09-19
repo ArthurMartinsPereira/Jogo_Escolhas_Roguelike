@@ -25,7 +25,7 @@ class Player(Entity):
         }
 
         # Equipamentos
-        self.equipament = {
+        self.equipment = {
             "armor": None,
             "handR": None,
             "handL": None,
@@ -54,7 +54,7 @@ class Player(Entity):
         base = self.stats.get("con", 10) * 10
 
         bonus = 0
-        for item in self.equipament.values():
+        for item in self.equipment.values():
             if item and hasattr(item, "hp_bonus"):
                 bonus += item.hp_bonus
 
@@ -148,7 +148,7 @@ class Player(Entity):
         if not slot:
             raise ValueError(f"Item '{item.name}' não tem slot definido")
 
-        if slot not in self.equipament:
+        if slot not in self.equipment:
             raise ValueError(f"Slot inválido: {slot}")
 
         # ===== DUAS MÃOS =====
@@ -156,11 +156,11 @@ class Player(Entity):
             self.unequip("handR", update=False, rebuild=False)
             self.unequip("handL", update=False, rebuild=False)
 
-            self.equipament["handR"] = item
-            self.equipament["handL"] = item
+            self.equipment["handR"] = item
+            self.equipment["handL"] = item
 
         else:
-            currentR = self.equipament.get("handR")
+            currentR = self.equipment.get("handR")
 
             # Remover arma de duas mãos equipada
             if currentR and getattr(currentR, "hands", 1) == 2:
@@ -168,7 +168,7 @@ class Player(Entity):
                 self.unequip("handL", update=False, rebuild=False)
 
             self.unequip(slot, update=False, rebuild=False)
-            self.equipament[slot] = item
+            self.equipment[slot] = item
 
         self.rebuild_passives()
 
@@ -177,26 +177,26 @@ class Player(Entity):
 
     def equip_artifact(self, item):
 
-        if not self.equipament["artifact1"]:
-            self.equipament["artifact1"] = item
+        if not self.equipment["artifact1"]:
+            self.equipment["artifact1"] = item
 
-        elif not self.equipament["artifact2"]:
-            self.equipament["artifact2"] = item
+        elif not self.equipment["artifact2"]:
+            self.equipment["artifact2"] = item
 
         else:
-            self.equipament["artifact1"] = item
+            self.equipment["artifact1"] = item
 
         self.rebuild_passives()
 
         self.update_hp()
 
     def unequip(self, slot, update=True, rebuild=True):
-        item = self.equipament.get(slot)
+        item = self.equipment.get(slot)
 
         if not item:
             return
 
-        self.equipament[slot] = None
+        self.equipment[slot] = None
 
         if rebuild:
             self.rebuild_passives()
@@ -210,7 +210,7 @@ class Player(Entity):
         processed = set()
 
         # Passivas de equipamentos
-        for item in self.equipament.values():
+        for item in self.equipment.values():
 
             if not item:
                 continue
@@ -271,7 +271,7 @@ class Player(Entity):
         processed = set()
 
         for slot in ["handR", "handL"]:
-            item = self.equipament.get(slot)
+            item = self.equipment.get(slot)
 
             if item and id(item) not in processed:
                 if hasattr(item, "get_damage_instances"):
